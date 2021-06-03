@@ -84,7 +84,7 @@ func (p *Plugin) ServeFile(args ...string) (h common.Handler, err error) {
 				return
 			}
 		} else {
-			key = target
+			key = filepath.Base(target)
 		}
 
 		if err := fs.Serve(key, ctx.Writer(), ctx.Request()); err != nil {
