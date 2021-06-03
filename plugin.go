@@ -3,6 +3,7 @@ package plugin
 import (
 	"fmt"
 	"log"
+	"path"
 	"path/filepath"
 
 	"github.com/gdbu/fileserver"
@@ -43,14 +44,28 @@ func (p *Plugin) Close() (err error) {
 
 // ServeFile will serve a file
 func (p *Plugin) ServeFile(args ...string) (h common.Handler, err error) {
-	var dir, root string
-	if len(args) != 2 {
-		err = fmt.Errorf("invalid number of arguments, expected %d and received %d", 2, len(args))
+	var (
+		target string
+		dir    string
+		root   string
+
+		isDir bool
+	)
+
+	switch len(args) {
+	case 1:
+		target = args[0]
+	case 2:
+		target = args[0]
+		root = args[1]
+		isDir = true
+	default:
+		err = fmt.Errorf("invalid number of arguments, expected 1-2 and received %d", len(args))
 		return
 	}
 
-	dir = args[0]
-	root = args[1]
+	target = path.Clean(target)
+	dir = filepath.Dir(target)
 
 	var fs *fileserver.FileServer
 	if fs, err = fileserver.New(dir); err != nil {
@@ -63,9 +78,13 @@ func (p *Plugin) ServeFile(args ...string) (h common.Handler, err error) {
 			err error
 		)
 
-		if key, err = getKeyFromRequestPath(root, ctx.Request().URL.Path); err != nil {
-			ctx.WriteString(400, "text/plain", err.Error())
-			return
+		if isDir {
+			if key, err = getKeyFromRequestPath(root, ctx.Request().URL.Path); err != nil {
+				ctx.WriteString(400, "text/plain", err.Error())
+				return
+			}
+		} else {
+			key = target
 		}
 
 		if err := fs.Serve(key, ctx.Writer(), ctx.Request()); err != nil {
