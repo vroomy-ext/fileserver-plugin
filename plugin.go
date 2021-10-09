@@ -10,7 +10,7 @@ import (
 	"github.com/gdbu/scribe"
 	"github.com/hatchify/errors"
 	"github.com/vroomy/common"
-	"github.com/vroomy/plugins"
+	"github.com/vroomy/vroomy"
 )
 
 var p Plugin
@@ -22,18 +22,18 @@ const (
 
 func init() {
 	p.out = scribe.New("Fileserver")
-	if err := plugins.Register("fileserver", &p); err != nil {
+	if err := vroomy.Register("fileserver", &p); err != nil {
 		log.Fatal(err)
 	}
 }
 
 type Plugin struct {
-	plugins.BasePlugin
+	vroomy.BasePlugin
 
 	out *scribe.Scribe
 }
 
-// Methods to match plugins.Plugin interface below
+// Methods to match vroomy.Plugin interface below
 
 // Close will close the plugin
 func (p *Plugin) Close() (err error) {
