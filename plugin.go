@@ -46,7 +46,6 @@ func (p *Plugin) Close() (err error) {
 func (p *Plugin) ServeFile(args ...string) (h common.Handler, err error) {
 	var (
 		target string
-		dir    string
 		root   string
 
 		isDir bool
@@ -65,10 +64,9 @@ func (p *Plugin) ServeFile(args ...string) (h common.Handler, err error) {
 	}
 
 	target = path.Clean(target)
-	dir = filepath.Dir(target)
 
 	var fs *fileserver.FileServer
-	if fs, err = fileserver.New(dir); err != nil {
+	if fs, err = fileserver.New(target); err != nil {
 		return
 	}
 
