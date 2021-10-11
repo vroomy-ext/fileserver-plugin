@@ -33,13 +33,6 @@ type Plugin struct {
 	out *scribe.Scribe
 }
 
-// Methods to match vroomy.Plugin interface below
-
-// Close will close the plugin
-func (p *Plugin) Close() (err error) {
-	return
-}
-
 // Handlers below
 
 // ServeFile will serve a file
