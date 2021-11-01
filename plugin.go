@@ -3,7 +3,6 @@ package plugin
 import (
 	"fmt"
 	"log"
-	"path"
 	"path/filepath"
 
 	"github.com/gdbu/fileserver"
@@ -38,48 +37,44 @@ type Plugin struct {
 // ServeFile will serve a file
 func (p *Plugin) ServeFile(args ...string) (h common.Handler, err error) {
 	var (
-		target string
-		root   string
-
-		isDir bool
+		dir      string
+		filename string
+		pathRoot string
 	)
 
-	switch len(args) {
-	case 1:
-		target = args[0]
-	case 2:
-		target = args[0]
-		root = args[1]
-		isDir = true
-	default:
-		err = fmt.Errorf("invalid number of arguments, expected 1-2 and received %d", len(args))
+	if dir, filename, pathRoot, err = parseArgs(args); err != nil {
 		return
 	}
 
-	target = path.Clean(target)
-
 	var fs *fileserver.FileServer
-	if fs, err = fileserver.New(target); err != nil {
+	if fs, err = fileserver.New(dir); err != nil {
 		return
+	}
+
+	var getTarget func(ctx common.Context) (target string, err error)
+	if len(filename) == 0 {
+		getTarget = func(ctx common.Context) (target string, err error) {
+			return getKeyFromRequestPath(pathRoot, ctx.Request().URL.Path)
+		}
+	} else {
+		getTarget = func(ctx common.Context) (target string, err error) {
+			return filename, nil
+		}
 	}
 
 	h = func(ctx common.Context) {
 		var (
-			key string
-			err error
+			target string
+			err    error
 		)
 
-		if isDir {
-			if key, err = getKeyFromRequestPath(root, ctx.Request().URL.Path); err != nil {
-				ctx.WriteString(400, "text/plain", err.Error())
-				return
-			}
-		} else {
-			key = filepath.Base(target)
+		if target, err = getTarget(ctx); err != nil {
+			ctx.WriteString(400, "text/plain", err.Error())
+			return
 		}
 
-		if err := fs.Serve(key, ctx.Writer(), ctx.Request()); err != nil {
-			err = fmt.Errorf("Error serving %s: %v", key, err)
+		if err := fs.Serve(target, ctx.Writer(), ctx.Request()); err != nil {
+			err = fmt.Errorf("Error serving %s: %v", target, err)
 			ctx.WriteString(400, "text/plain", err.Error())
 			return
 		}
