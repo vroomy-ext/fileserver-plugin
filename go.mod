@@ -7,5 +7,5 @@ require (
 	github.com/gdbu/scribe v0.5.3
 	github.com/hatchify/errors v0.4.82
 	github.com/vroomy/common v0.5.2
-	github.com/vroomy/vroomy v0.12.0
+	github.com/vroomy/vroomy v0.12.2
 )
