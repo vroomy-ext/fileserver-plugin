@@ -8,7 +8,7 @@ import (
 	"github.com/gdbu/fileserver"
 	"github.com/gdbu/scribe"
 	"github.com/hatchify/errors"
-	"github.com/vroomy/common"
+	"github.com/vroomy/httpserve"
 	"github.com/vroomy/vroomy"
 )
 
@@ -35,7 +35,7 @@ type Plugin struct {
 // Handlers below
 
 // ServeFile will serve a file
-func (p *Plugin) ServeFile(args ...string) (h common.Handler, err error) {
+func (p *Plugin) ServeFile(args ...string) (h httpserve.Handler, err error) {
 	var (
 		dir      string
 		filename string
@@ -51,18 +51,18 @@ func (p *Plugin) ServeFile(args ...string) (h common.Handler, err error) {
 		return
 	}
 
-	var getTarget func(ctx common.Context) (target string, err error)
+	var getTarget func(ctx *httpserve.Context) (target string, err error)
 	if len(filename) == 0 {
-		getTarget = func(ctx common.Context) (target string, err error) {
+		getTarget = func(ctx *httpserve.Context) (target string, err error) {
 			return getKeyFromRequestPath(pathRoot, ctx.Request().URL.Path)
 		}
 	} else {
-		getTarget = func(ctx common.Context) (target string, err error) {
+		getTarget = func(ctx *httpserve.Context) (target string, err error) {
 			return filename, nil
 		}
 	}
 
-	h = func(ctx common.Context) {
+	h = func(ctx *httpserve.Context) {
 		var (
 			target string
 			err    error
