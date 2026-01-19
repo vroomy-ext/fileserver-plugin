@@ -5,9 +5,8 @@ import (
 	"log"
 	"path/filepath"
 
+	"github.com/gdbu/errors"
 	"github.com/gdbu/fileserver"
-	"github.com/gdbu/scribe"
-	"github.com/hatchify/errors"
 	"github.com/vroomy/httpserve"
 	"github.com/vroomy/vroomy"
 )
@@ -20,7 +19,6 @@ const (
 )
 
 func init() {
-	p.out = scribe.New("Fileserver")
 	if err := vroomy.Register("fileserver", &p); err != nil {
 		log.Fatal(err)
 	}
@@ -28,8 +26,6 @@ func init() {
 
 type Plugin struct {
 	vroomy.BasePlugin
-
-	out *scribe.Scribe
 }
 
 // Handlers below
